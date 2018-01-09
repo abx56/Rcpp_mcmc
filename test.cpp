@@ -1,8 +1,8 @@
 #include <Rcpp.h>
-#include <RcppEigen.h>
-#include <Eigen/Eigenvalues> 
+//#include <RcppEigen.h>
+//#include <Eigen/Eigenvalues> 
 using namespace Rcpp;
-using namespace RcppEigen;
+//using namespace RcppEigen;
 
 
 NumericMatrix mmult(NumericMatrix m1, NumericMatrix m2){
@@ -35,8 +35,19 @@ NumericMatrix transpose(NumericMatrix X){
   } 
   return(ans);
 };
+
+NumericVector first_abs_eigenvec(NumericMatrix a){
+  Rcpp::Environment global = Rcpp::Environment::global_env();
+  Function getEigenVectors = global["getEigenVectors"];
+  ComplexMatrix EigenVec = getEigenVectors(a);
+  return Mod(EigenVec(_,0));
+};
+
 // [[Rcpp::export]]
-NumericVector bb(NumericMatrix mat) {
+SEXP bb(NumericMatrix mat) {
+  Rcpp::Environment global = Rcpp::Environment::global_env();
+  Function getEigenVectors = global["getEigenVectors"];
+  Function getEigenValues = global["getEigenValues"];
   int k =5;
   NumericMatrix x(k,k);
   std::fill(x.begin(),x.end(),2);
@@ -46,19 +57,16 @@ NumericVector bb(NumericMatrix mat) {
   //y.attr("dim") = Dimension(k, 1);
   Range rowind(0, k-2);
   Range ran(0,k-1);
-  for (int i=0;i<k;i++){x(_,i)=exp(x(_,i));}
+  //for (int i=0;i<k;i++){x(_,i)=exp(x(_,i));}
   NumericMatrix a(1,k-1);
   NumericVector n=wrap(m(rowind,_));
-  x(_,1)=n;
+  //x(_,1)=n;
   //SelfAdjointEigenSolver<MatrixXd> es(x);
-  MatrixXd Y = RcppEigen::as<MatrixXd>(x);
-  return Y.eigenvalues();
+  //MatrixXd Y = RcppEigen::as<MatrixXd>(x);
+  //ComplexMatrix result = getEigenValues(mat);
+  //NumericMatrix res=wrap(Re(result));
+  //return wrap(first_real_eigenvec(mat));
+  return wrap(first_abs_eigenvec(mat));
 }
-
-
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically 
-// run after the compilation.
-//
 
 
