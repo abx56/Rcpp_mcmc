@@ -47,6 +47,13 @@ int my_rmultinomF(NumericVector a){
   NumericVector x = rmultinomF(a);
   return x[0];
 };
+
+NumericVector first_abs_eigenvec(NumericMatrix a){
+  Rcpp::Environment global = Rcpp::Environment::global_env();
+  Function getEigenVectors = global["getEigenVectors"];
+  ComplexMatrix EigenVec = getEigenVectors(a);
+  return Mod(EigenVec(_,0));
+};
   
 // [[Rcpp::export]]
 NumericVector llmnl_initial_mcprice(NumericVector beta,NumericVector y,NumericMatrix X,
@@ -62,6 +69,9 @@ NumericVector llmnl_initial_mcprice(NumericVector beta,NumericVector y,NumericMa
   int n=y.size(); // number of choices
   int j=X.nrow()/n; // number of brands
   int nvar = X.ncol();
+  
+  NumericVector vec;
+  NumericMatrix mat_beta( beta.size() , 1 , beta.begin() ); //convert beta to matrix
   
   // added to llmnl function 
   if (count_out != 0) { // if the initial state is not known
@@ -91,7 +101,7 @@ NumericVector llmnl_initial_mcprice(NumericVector beta,NumericVector y,NumericMa
         NumericMatrix prob_forward;
         for (int i=1;i<draws_length;i++){
           NumericMatrix exp_xbeta_forward(j,1);
-          NumericMatrix mat_beta( beta.size() , 1 , beta.begin() ); //convert beta to matrix
+          //NumericMatrix mat_beta( beta.size() , 1 , beta.begin() ); //convert beta to matrix
           exp_xbeta_forward = mmult(X_forward,mat_beta);
           
           prob_forward = exp_xbeta_forward / sum(exp_xbeta_forward); //differ from original(mat/vec)
@@ -123,7 +133,7 @@ NumericVector llmnl_initial_mcprice(NumericVector beta,NumericVector y,NumericMa
         xbeta_state(_,j_state) = xbeta(_,j_state) + beta[nvar];
         NumericMatrix xb0(xbeta_state.nrow(),xbeta_state.ncol());
         for(int i=0;i<xb0.ncol();i++){xb0(_,i) = exp(xbeta_state(_,i));}
-        NumericMatrix prob0(xb0.nrow(),xb0.ncol());
+        NumericMatrix prob0(xb0.nrow(),xb0.ncol());  //case matter??
         for(int i=0;i<xb0.nrow();i++){prob0(i,_) = xb0(i,_)/sum(xb0(i,_));}
         NumericMatrix tmp_prob;
         NumericMatrix mat_price_states_probs(1,vec_price_states_probs.size(),vec_price_states_probs.begin());
@@ -135,17 +145,40 @@ NumericVector llmnl_initial_mcprice(NumericVector beta,NumericVector y,NumericMa
       }
       //aaa = eigen(Prob0) 
       //vec = abs(aaa$vectors[,1]);
-      
-      if (is.complex(vec)) vec <- Re(vec) # for odd rare cases of i numbers
-          vec = vec / sum(vec) # marginal probability
+
+      //if (is.complex(vec)) vec <- Re(vec) # for odd rare cases of i numbers
+      //    vec = vec / sum(vec) # marginal probability
+      vec = first_abs_eigenvec(Prob0);
+      vec = vec / sum(vec);
       //# these are marginal probabilites of chosings states for average prices
     }
+    if (!flag_know_state) {// # if we are in the case when the data was not dropped and initial state is not known
+      int s0 = my_rmultinomF(vec); //# draw for the initial state
+      Range ran(1,count_out*j);
+      for(int i=0;i<count_out*j;i++) X(i,nvar) = 0;
+      for(int i=0;i<(count_out-1)*j;i++) X(s0+i-1,nvar) = 1;  //# assign drawn initial state to all observations until the first brand is chosen
+    }
+  }
+  //######################################################################################################
+
+  NumericMatrix Xbeta = mmult(X,mat_beta);
+  //Xbeta=matrix(Xbeta,byrow=T,ncol=j)
+  NumericMatrix ind(2,n);
+  ind(_,1)=y;
+  for(int i=0;i<n;i++) ind(i,0)=i;
+  xby=Xbeta[ind]
+  Xbeta=exp(Xbeta)
+    iota=c(rep(1,j))
+    denom=log(Xbeta%*%iota)
+    
+    if (flag_know_state) {
+      xb_init = matrix(exp(initial_price_state_dropped%*%beta), ncol = j, byrow = T) # matrix of expxbeta by each possible (m-1) state
+      prob_init = xb_init/apply(xb_init,1,sum) # matrix of choice probabilities
+      vec_with_init = vec%*%prob_init # marginal probabilities
+      return(sum(xby-denom) + log(vec_with_init[s1]))
+    } else {
+      return(sum(xby-denom))
+    }
 }
-
-
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically 
-// run after the compilation.
-//
 
 

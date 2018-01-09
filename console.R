@@ -7,7 +7,7 @@ library('RcppEigen')
 sourceCpp("llmnl_initial_mcprice.cpp")
 sourceCpp("test.cpp")
 sourceCpp("getEigenValues.cpp")
-bb(matrix(1:10,2))
+bb(tmp)
 
 vec <- runif(10)
 timesTwo(vec)
