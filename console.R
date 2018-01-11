@@ -1,17 +1,25 @@
 library('Rcpp')
 library('devtools')
 find_rtools(T)
-#install.packages("RcppEigen")
-library('RcppEigen')
+#library('RcppEigen')
+library('bayesm')
+library('RcppArmadillo')
 
-sourceCpp("llmnl_initial_mcprice.cpp")
-sourceCpp("test.cpp")
+sourceCpp("llmnl_initial_mcprice_bayesm.cpp")
+
+sourceCpp("rhierMnlRwMixture_rcpp_loop2.cpp")
+sourceCpp("test1.cpp")
 sourceCpp("getEigenValues.cpp")
 bb(tmp)
 
-vec <- runif(10)
-timesTwo(vec)
-rmultinomF(3)
+vec <- matrix(1:100,10)
+vectmp <- matrix(1:100,10)
+vectmp <- 1:10
+vec1 <- matrix(runif(100),10,10)
+vec2 <- matrix(runif(10),5,2)
+tmp <- runif(10)
+bb(vec,tmp,vectmp)
+my_rmultinomF(tmp)
 
 
 
@@ -63,4 +71,30 @@ return mmult(x,y);}
 '
 cppFunction(bb)
 bb(5)
+
+
+
+
+
+betac=rnorm(11)
+y=rnorm(10)
+X=matrix(1:1000,100)
+count_out=10
+initial_price_id=5
+initial_price_state_dropped=matrix(runif(100),10)*10
+initial_price_state_dropped=runif(10)
+s1=5
+transition_matrix_median_steps=matrix(runif(100),10)
+price_transition_states=matrix(rnorm(100),10)
+vec_price_states_probs=runif(10)
+draws_length=5
+number_price_simulations=10
+flag_markovian=TRUE
+flag_know_state=FALSE
+
+sourceCpp("llmnl_initial_mcprice_bayesm.cpp")
+llmnl_initial_mcprice2(betac,y,X,count_out,initial_price_id,initial_price_state_dropped,s1,
+                      transition_matrix_median_steps,price_transition_states,
+                      vec_price_states_probs,draws_length,number_price_simulations,
+                      flag_markovian,flag_know_state)
 
