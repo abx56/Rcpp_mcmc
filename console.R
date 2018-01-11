@@ -1,6 +1,7 @@
 library('Rcpp')
 library('devtools')
 find_rtools(T)
+<<<<<<< HEAD
 #library('RcppEigen')
 library('bayesm')
 library('RcppArmadillo')
@@ -20,6 +21,19 @@ vec2 <- matrix(runif(10),5,2)
 tmp <- runif(10)
 bb(vec,tmp,vectmp)
 my_rmultinomF(tmp)
+=======
+#install.packages("RcppEigen")
+library('RcppEigen')
+
+sourceCpp("llmnl_initial_mcprice.cpp")
+sourceCpp("test.cpp")
+sourceCpp("getEigenValues.cpp")
+bb(tmp)
+
+vec <- runif(10)
+timesTwo(vec)
+rmultinomF(3)
+>>>>>>> b4340808b0b248c676126dcb29c8fc3f10edd862
 
 
 
@@ -72,6 +86,7 @@ return mmult(x,y);}
 cppFunction(bb)
 bb(5)
 
+<<<<<<< HEAD
 
 
 
@@ -98,3 +113,5 @@ llmnl_initial_mcprice2(betac,y,X,count_out,initial_price_id,initial_price_state_
                       vec_price_states_probs,draws_length,number_price_simulations,
                       flag_markovian,flag_know_state)
 
+=======
+>>>>>>> b4340808b0b248c676126dcb29c8fc3f10edd862
