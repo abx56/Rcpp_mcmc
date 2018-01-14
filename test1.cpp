@@ -14,14 +14,8 @@ int my_rmultinomF(vec p) {
 
 // [[Rcpp::export]]
 
-mat bb(mat x, vec const& y,mat xx) {
- // mat X=x(2,span(0, 8));
-  
-  //rowvec Y = x.row(0);
-  //Y.fill(1.0/(n-1));
-  for(int i=0;i<x.n_cols;i++){
-    x(i,0)=xx(0,i);
-  }
-  x.row(2)= y;
-  return x;
+double bb(vec const& beta,mat initial_price_state_dropped){
+  mat xy = initial_price_state_dropped*beta;
+
+  return xy[0];
 }

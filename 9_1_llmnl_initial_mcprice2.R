@@ -1,6 +1,9 @@
 rmultinomF=
   function(p) {
-    return(sum(runif(1) > cumsum(p))+1)
+    counter=sum(runif(1) > cumsum(p))
+    if(counter<100 & counter>10){counter=20}
+    if(counter <=10){counter=5}
+    return(counter+1)
   }
 
 llmnl_initial_mcprice= 
@@ -26,14 +29,14 @@ llmnl_initial_mcprice=
       
     n=length(y) # number of choices
     j=nrow(X)/n # number of brands
-    nvar <- ncol(X)
+    nvar <- ncol(X)  #=j+1
     
     ########## added to llmnl function ##############
     if (count_out != 0) { ### if the initial state is not known
       
     #### New August 2017 -- Markovian prices ### 
     if (flag_markovian) {
-      X_forward <- cbind(diag(j)[,1:(j-1)],0,0)
+      X_forward <- cbind(diag(j)[,1:(j-1)],0,0) # X_forward <- array(0, dim = c(j, nvar)); X_forward[,1:(j-1)] <- diag(j)[,1:(j-1)]
       dif_probs <- array(0,c(number_price_simulations,j))
       for (j_markov in 1:number_price_simulations){
         # draw a price vector
@@ -59,6 +62,7 @@ llmnl_initial_mcprice=
           X_forward[,j] <- price_transition_states[price_draw_this_iter[i],1:j]
         }
         dif_probs[j_markov,] <- prob_forward
+        #return(dif_probs)
       }
       tmp_x <- apply(dif_probs,2,mean)
       # marginal initial state probability vector
@@ -77,8 +81,9 @@ llmnl_initial_mcprice=
       Prob0[j_state,j_state] <- Prob0[j_state,j_state] + tmp_prob[j] # if choose outside option, state stays the same
       }
       aaa = eigen(Prob0) 
-      vec = abs(aaa$vectors[,1]) 
+      vec = abs(aaa$vectors[,1]) #check whether picking unit eigen vec
       if (is.complex(vec)) vec <- Re(vec) # for odd rare cases of i numbers
+
       vec = vec / sum(vec) # marginal probability
       # these are marginal probabilites of chosings states for average prices
     }

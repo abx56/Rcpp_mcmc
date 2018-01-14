@@ -1,5 +1,4 @@
 #include "bayesm.h"
-<<<<<<< HEAD
 #include "Rcpp.h"
 using namespace Rcpp;
 
@@ -22,7 +21,7 @@ mnlMetropOnceOut mnlMetropOnce_con(vec const& y, mat const& X, vec const& oldbet
                                             int s1,mat const& transition_matrix_median_steps,mat const& price_transition_states,
                                             vec const& vec_price_states_probs,int draws_length,int number_price_simulations,
                                             bool flag_markovian,bool flag_know_state){ 
-=======
+
 
 //FUNCTION SPECIFIC TO MAIN FUNCTION------------------------------------------------------
 //[[Rcpp::export]]

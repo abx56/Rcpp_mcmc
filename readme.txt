@@ -20,6 +20,9 @@ Feel free to shoot me an email if you have some questions!
 sourceCpp("optimal2.cpp")
 Rcpp::Environment global = Rcpp::Environment::global_env();
 Rcpp::Function mutualinfo = global["mutualinfo"];
+
+R CMD BATCH --args xxx.R
+cd ~/'iCloud Drive (Archive)'/Documents/GitHub/Rcpp_mcmc
 ################################################################
 
 #9_1_corrLike.R
